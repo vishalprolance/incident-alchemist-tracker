@@ -5,7 +5,8 @@ import {
   AlertTriangle, 
   Settings, 
   PlusCircle,
-  Clock 
+  Clock,
+  Menu
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -19,13 +20,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger
+  useSidebar
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const mainMenuItems = [
     {
@@ -55,8 +59,8 @@ export function AppSidebar() {
     }
   ];
 
-  return (
-    <Sidebar>
+  const SidebarContent = () => (
+    <>
       <SidebarHeader className="py-4">
         <div className="flex items-center px-4">
           <div className="flex-1">
@@ -93,6 +97,32 @@ export function AppSidebar() {
           Create New Ticket
         </Button>
       </SidebarFooter>
+    </>
+  );
+
+  // For mobile view, we'll use a Sheet component that slides in from the left
+  if (isMobile) {
+    return (
+      <div className="fixed top-0 left-0 z-50 p-4">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[240px] p-0 bg-sidebar text-sidebar-foreground">
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
+      </div>
+    );
+  }
+
+  // For desktop view, return the regular sidebar
+  return (
+    <Sidebar>
+      <SidebarContent />
     </Sidebar>
   );
 }
