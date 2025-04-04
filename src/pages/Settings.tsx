@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Separator } from "@/components/ui/separator";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const settingsFormSchema = z.object({
   companyName: z.string().min(2, {
@@ -36,19 +37,23 @@ const settingsFormSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsFormSchema>;
 
-const defaultValues: SettingsFormValues = {
-  companyName: "My Organization",
-  emailNotifications: true,
-  theme: "system",
-};
-
 export default function Settings() {
+  const { theme, setTheme } = useTheme();
+  
+  const defaultValues: SettingsFormValues = {
+    companyName: "My Organization",
+    emailNotifications: true,
+    theme: theme as "light" | "dark" | "system",
+  };
+  
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
     defaultValues,
   });
 
   function onSubmit(data: SettingsFormValues) {
+    setTheme(data.theme);
+    
     toast.success("Settings saved!", {
       description: "Your settings have been updated successfully.",
     });
@@ -97,7 +102,10 @@ export default function Settings() {
                     <FormItem>
                       <FormLabel>Theme</FormLabel>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setTheme(value as "light" | "dark" | "system");
+                        }}
                         defaultValue={field.value}
                       >
                         <FormControl>

@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TicketProvider } from "@/contexts/TicketContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Layout } from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import Incidents from "@/pages/Incidents";
@@ -19,26 +20,28 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TicketProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="incidents" element={<Incidents />} />
-              <Route path="problems" element={<Problems />} />
-              <Route path="changes" element={<Changes />} />
-              <Route path="new-ticket" element={<NewTicket />} />
-              <Route path="ticket/:id" element={<TicketView />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </TicketProvider>
+    <ThemeProvider>
+      <TicketProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="incidents" element={<Incidents />} />
+                <Route path="problems" element={<Problems />} />
+                <Route path="changes" element={<Changes />} />
+                <Route path="new-ticket" element={<NewTicket />} />
+                <Route path="ticket/:id" element={<TicketView />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </TicketProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

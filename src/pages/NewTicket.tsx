@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { TicketForm } from "@/components/TicketForm";
 import { TicketType } from "@/contexts/TicketContext";
+import { GenAITicketCreator } from "@/components/GenAITicketCreator";
 
 export default function NewTicket() {
   const navigate = useNavigate();
@@ -24,17 +25,20 @@ export default function NewTicket() {
   
   return (
     <div className="space-y-6">
-      <div className="flex items-center">
-        <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="mr-4">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Create New Ticket</h2>
-          <p className="text-muted-foreground">
-            Fill in the details to create a new {ticketType}
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="mr-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Create New Ticket</h2>
+            <p className="text-muted-foreground">
+              Fill in the details to create a new {ticketType}
+            </p>
+          </div>
         </div>
+        <GenAITicketCreator />
       </div>
       
       <div className="mx-auto max-w-2xl">
