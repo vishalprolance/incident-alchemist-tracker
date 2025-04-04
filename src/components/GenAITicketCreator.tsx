@@ -33,7 +33,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTickets, TicketType } from "@/contexts/TicketContext";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
+import { getSuggestedActions } from "@/services/geminiService";
 
 const promptSchema = z.object({
   prompt: z.string().min(10, {
@@ -43,40 +44,6 @@ const promptSchema = z.object({
 });
 
 type PromptValues = z.infer<typeof promptSchema>;
-
-// Mock AI response function - in a real application, this would call an AI API
-const generateTicketFromAI = async (prompt: string, type: TicketType) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Return mock response based on type
-  const commonFields = {
-    assignedTo: "AI Assistant",
-  };
-  
-  if (type === "incident") {
-    return {
-      title: `Incident: ${prompt.slice(0, 40)}...`,
-      description: `This incident was generated from the prompt: "${prompt}"\n\nRecommended steps:\n1. Identify affected systems\n2. Check logs for errors\n3. Restart services if needed\n4. Verify system functionality`,
-      priority: "medium",
-      ...commonFields,
-    };
-  } else if (type === "problem") {
-    return {
-      title: `Problem: ${prompt.slice(0, 40)}...`,
-      description: `This problem was generated from the prompt: "${prompt}"\n\nRoot cause analysis:\n- Possible system configuration issues\n- Network connectivity problems\n- Application performance bottlenecks\n\nRecommended investigation steps:\n1. Review system logs\n2. Check for recent changes\n3. Monitor resource usage`,
-      priority: "low",
-      ...commonFields,
-    };
-  } else {
-    return {
-      title: `Change: ${prompt.slice(0, 40)}...`,
-      description: `This change request was generated from the prompt: "${prompt}"\n\nProposed changes:\n- Update system configuration\n- Deploy new version\n- Modify user permissions\n\nImplementation plan:\n1. Create backup\n2. Apply changes\n3. Test functionality\n4. Document changes`,
-      priority: "low",
-      ...commonFields,
-    };
-  }
-};
 
 export function GenAITicketCreator() {
   const [open, setOpen] = useState(false);
@@ -96,8 +63,38 @@ export function GenAITicketCreator() {
   const onSubmit = async (values: PromptValues) => {
     setIsLoading(true);
     try {
-      const generatedTicket = await generateTicketFromAI(values.prompt, values.type);
-      setTicketData(generatedTicket);
+      // Use our Gemini service instead of the mock function
+      const aiResponse = await getSuggestedActions(values.type, values.prompt);
+      
+      // Parse the AI response to extract title, priority, and actions
+      let title = values.prompt.slice(0, 40) + "..."; // Default title
+      let priority: "low" | "medium" | "high" = "medium"; // Default priority
+      let description = values.prompt;
+      
+      // Add the AI response as additional context
+      description += "\n\n--- AI Analysis ---\n" + aiResponse;
+      
+      // Extract title if the AI provided one (simplistic parsing)
+      const titleMatch = aiResponse.match(/title:?\s*([^\n]+)/i);
+      if (titleMatch && titleMatch[1]) {
+        title = titleMatch[1].trim();
+      }
+      
+      // Extract priority if the AI provided one
+      if (aiResponse.toLowerCase().includes("priority: high") || 
+          aiResponse.toLowerCase().includes("priority level: high")) {
+        priority = "high";
+      } else if (aiResponse.toLowerCase().includes("priority: low") || 
+                aiResponse.toLowerCase().includes("priority level: low")) {
+        priority = "low";
+      }
+      
+      setTicketData({
+        title,
+        description,
+        priority,
+        assignedTo: "AI Assistant",
+      });
     } catch (error) {
       toast.error("Failed to generate ticket", {
         description: "Please try again with a different prompt",
@@ -131,7 +128,10 @@ export function GenAITicketCreator() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">Create with AI</Button>
+        <Button variant="default" className="gap-2">
+          <Sparkles className="h-4 w-4" /> 
+          Create with AI
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
@@ -198,8 +198,8 @@ export function GenAITicketCreator() {
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" disabled={isLoading} className="gap-2">
+                  {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                   {isLoading ? "Generating..." : "Generate Ticket"}
                 </Button>
               </DialogFooter>

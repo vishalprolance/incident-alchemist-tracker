@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BarChart3, FileWarning, AlertTriangle, Clock, Ticket } from "lucide-react";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useTickets, TicketStatus, TicketType } from "@/contexts/TicketContext";
 import { TicketCard } from "@/components/TicketCard";
+import { TicketStats } from "@/components/TicketStats";
 
 export default function Dashboard() {
   const { tickets } = useTickets();
@@ -95,117 +95,128 @@ export default function Dashboard() {
         </Card>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              The latest tickets in the system
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentTickets.length > 0 ? (
-                recentTickets.map(ticket => (
-                  <TicketCard key={ticket.id} ticket={ticket} />
-                ))
-              ) : (
-                <p className="text-muted-foreground text-center py-6">No tickets found</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Status Overview</CardTitle>
-            <CardDescription>
-              Current ticket status breakdown
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">New</span>
-                    <span className="text-sm text-muted-foreground">{countByStatus("new")}</span>
+      <Tabs defaultValue="charts">
+        <TabsList>
+          <TabsTrigger value="charts">Charts</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+        </TabsList>
+        <TabsContent value="charts" className="pt-4">
+          <TicketStats />
+        </TabsContent>
+        <TabsContent value="overview" className="pt-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="col-span-4">
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>
+                  The latest tickets in the system
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentTickets.length > 0 ? (
+                    recentTickets.map(ticket => (
+                      <TicketCard key={ticket.id} ticket={ticket} />
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-center py-6">No tickets found</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="col-span-3">
+              <CardHeader>
+                <CardTitle>Status Overview</CardTitle>
+                <CardDescription>
+                  Current ticket status breakdown
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">New</span>
+                        <span className="text-sm text-muted-foreground">{countByStatus("new")}</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                        <div 
+                          className="h-full bg-status-new rounded-full" 
+                          style={{ width: `${tickets.length > 0 ? (countByStatus("new") / tickets.length) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">In Progress</span>
+                        <span className="text-sm text-muted-foreground">{countByStatus("inProgress")}</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                        <div 
+                          className="h-full bg-status-inProgress rounded-full" 
+                          style={{ width: `${tickets.length > 0 ? (countByStatus("inProgress") / tickets.length) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                    <div 
-                      className="h-full bg-status-new rounded-full" 
-                      style={{ width: `${tickets.length > 0 ? (countByStatus("new") / tickets.length) * 100 : 0}%` }}
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">On Hold</span>
+                        <span className="text-sm text-muted-foreground">{countByStatus("onHold")}</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                        <div 
+                          className="h-full bg-status-onHold rounded-full" 
+                          style={{ width: `${tickets.length > 0 ? (countByStatus("onHold") / tickets.length) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Resolved</span>
+                        <span className="text-sm text-muted-foreground">{countByStatus("resolved")}</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                        <div 
+                          className="h-full bg-status-resolved rounded-full" 
+                          style={{ width: `${tickets.length > 0 ? (countByStatus("resolved") / tickets.length) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Closed</span>
+                      <span className="text-sm text-muted-foreground">{countByStatus("closed")}</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                      <div 
+                        className="h-full bg-status-closed rounded-full" 
+                        style={{ width: `${tickets.length > 0 ? (countByStatus("closed") / tickets.length) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">High Priority</span>
+                      <span className="text-sm text-muted-foreground">{priorityHigh}</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                      <div 
+                        className="h-full bg-priority-high rounded-full" 
+                        style={{ width: `${tickets.length > 0 ? (priorityHigh / tickets.length) * 100 : 0}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">In Progress</span>
-                    <span className="text-sm text-muted-foreground">{countByStatus("inProgress")}</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                    <div 
-                      className="h-full bg-status-inProgress rounded-full" 
-                      style={{ width: `${tickets.length > 0 ? (countByStatus("inProgress") / tickets.length) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">On Hold</span>
-                    <span className="text-sm text-muted-foreground">{countByStatus("onHold")}</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                    <div 
-                      className="h-full bg-status-onHold rounded-full" 
-                      style={{ width: `${tickets.length > 0 ? (countByStatus("onHold") / tickets.length) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Resolved</span>
-                    <span className="text-sm text-muted-foreground">{countByStatus("resolved")}</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                    <div 
-                      className="h-full bg-status-resolved rounded-full" 
-                      style={{ width: `${tickets.length > 0 ? (countByStatus("resolved") / tickets.length) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Closed</span>
-                  <span className="text-sm text-muted-foreground">{countByStatus("closed")}</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                  <div 
-                    className="h-full bg-status-closed rounded-full" 
-                    style={{ width: `${tickets.length > 0 ? (countByStatus("closed") / tickets.length) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-              <Separator />
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">High Priority</span>
-                  <span className="text-sm text-muted-foreground">{priorityHigh}</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                  <div 
-                    className="h-full bg-priority-high rounded-full" 
-                    style={{ width: `${tickets.length > 0 ? (priorityHigh / tickets.length) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
       
       <div className="flex justify-center md:justify-end">
         <Button onClick={() => navigate("/new-ticket")}>
