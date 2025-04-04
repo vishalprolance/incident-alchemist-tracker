@@ -14,7 +14,7 @@ export function Layout() {
         <main className="flex-1 overflow-x-hidden px-4 pt-6 sm:px-6 sm:pt-8">
           <div className="mx-auto max-w-6xl pb-12">
             {isMobile && (
-              <div className="mb-4 text-xl md:hidden font-bold">
+              <div className="mb-4 text-xl md:hidden font-bold text-left">
                 Incident Alchemist
               </div>
             )}

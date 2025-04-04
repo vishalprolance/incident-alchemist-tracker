@@ -104,7 +104,7 @@ export function AppSidebar() {
   // For mobile view, we'll use a Sheet component that slides in from the left
   if (isMobile) {
     return (
-      <div className="fixed top-0 left-0 z-50 p-4">
+      <div className="fixed top-0 right-0 z-50 p-4">
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden">
