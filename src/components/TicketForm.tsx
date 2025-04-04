@@ -61,8 +61,14 @@ export function TicketForm({ defaultType }: TicketFormProps) {
   });
 
   const onSubmit = (values: FormValues) => {
+    // Since we're using zod validation, we can be assured these values are not undefined
+    // by the time this function is called, so we can safely pass them to addTicket
     addTicket({
-      ...values,
+      title: values.title,
+      description: values.description,
+      type: values.type,
+      priority: values.priority,
+      assignedTo: values.assignedTo,
       status: "new",
     });
     
