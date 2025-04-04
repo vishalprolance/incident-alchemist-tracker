@@ -59,7 +59,8 @@ export function AppSidebar() {
     }
   ];
 
-  const SidebarContent = () => (
+  // Renamed from SidebarContent to SidebarContentItems to avoid naming conflict
+  const SidebarContentItems = () => (
     <>
       <SidebarHeader className="py-4">
         <div className="flex items-center px-4">
@@ -112,7 +113,7 @@ export function AppSidebar() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[240px] p-0 bg-sidebar text-sidebar-foreground">
-            <SidebarContent />
+            <SidebarContentItems />
           </SheetContent>
         </Sheet>
       </div>
@@ -122,7 +123,7 @@ export function AppSidebar() {
   // For desktop view, return the regular sidebar
   return (
     <Sidebar>
-      <SidebarContent />
+      <SidebarContentItems />
     </Sidebar>
   );
 }

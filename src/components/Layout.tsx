@@ -10,8 +10,7 @@ export function Layout() {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
-        {!isMobile && <AppSidebar />}
-        {isMobile && <AppSidebar />}
+        <AppSidebar />
         <main className="flex-1 overflow-x-hidden px-4 pt-6 sm:px-6 sm:pt-8">
           <div className="mx-auto max-w-6xl pb-12">
             {isMobile && (
