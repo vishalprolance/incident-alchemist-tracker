@@ -1,9 +1,15 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 export type TicketPriority = "low" | "medium" | "high";
 export type TicketStatus = "new" | "inProgress" | "onHold" | "resolved" | "closed";
 export type TicketType = "incident" | "problem" | "change";
+
+interface Comment {
+  id: string;
+  content: string;
+  author: string;
+  timestamp: Date;
+}
 
 export interface Ticket {
   id: string;
@@ -15,6 +21,10 @@ export interface Ticket {
   assignedTo: string;
   createdAt: Date;
   updatedAt: Date;
+  resolution?: string;
+  rootCause?: string;
+  impactedSystems?: string;
+  comments?: Comment[];
 }
 
 interface TicketContextType {
@@ -40,6 +50,14 @@ const sampleTickets: Ticket[] = [
     assignedTo: "John Doe",
     createdAt: new Date("2025-04-01T10:00:00"),
     updatedAt: new Date("2025-04-01T10:30:00"),
+    comments: [
+      {
+        id: "c1",
+        content: "Initial investigation shows the main router in Building A is not responding.",
+        author: "John Doe",
+        timestamp: new Date("2025-04-01T10:15:00")
+      }
+    ]
   },
   {
     id: "2",
@@ -51,6 +69,7 @@ const sampleTickets: Ticket[] = [
     assignedTo: "Jane Smith",
     createdAt: new Date("2025-04-02T09:00:00"),
     updatedAt: new Date("2025-04-02T09:00:00"),
+    comments: []
   },
   {
     id: "3",
@@ -62,6 +81,15 @@ const sampleTickets: Ticket[] = [
     assignedTo: "Robert Johnson",
     createdAt: new Date("2025-04-03T14:00:00"),
     updatedAt: new Date("2025-04-03T15:30:00"),
+    impactedSystems: "Accounting software, Financial reporting system",
+    comments: [
+      {
+        id: "c2",
+        content: "Change advisory board review scheduled for tomorrow.",
+        author: "Robert Johnson",
+        timestamp: new Date("2025-04-03T15:00:00")
+      }
+    ]
   },
   {
     id: "4",

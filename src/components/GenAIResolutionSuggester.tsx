@@ -24,6 +24,32 @@ export function GenAIResolutionSuggester({ ticket }: GenAIResolutionSuggesterPro
   const [isLoading, setIsLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
 
+  const getAnalysisTitle = () => {
+    switch (ticket.type) {
+      case "incident":
+        return "AI Root Cause Analysis";
+      case "problem":
+        return "AI Solution Suggestions";
+      case "change":
+        return "AI Implementation Guide";
+      default:
+        return "AI Analysis";
+    }
+  };
+
+  const getAnalysisDescription = () => {
+    switch (ticket.type) {
+      case "incident":
+        return "AI-powered root cause analysis and recommendations.";
+      case "problem":
+        return "AI-generated solution suggestions and fix recommendations.";
+      case "change":
+        return "Standard operating procedure and implementation steps.";
+      default:
+        return "AI-powered analysis and recommendations.";
+    }
+  };
+
   const handleGetAnalysis = async () => {
     setIsLoading(true);
     try {
@@ -34,6 +60,19 @@ export function GenAIResolutionSuggester({ ticket }: GenAIResolutionSuggesterPro
       toast.error("Failed to generate AI analysis");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const getButtonText = () => {
+    switch (ticket.type) {
+      case "incident":
+        return "Get Root Cause Analysis";
+      case "problem":
+        return "Get Solution Suggestions";
+      case "change":
+        return "Get Implementation Guide";
+      default:
+        return "Get AI Analysis";
     }
   };
 
@@ -50,14 +89,14 @@ export function GenAIResolutionSuggester({ ticket }: GenAIResolutionSuggesterPro
           }}
         >
           <Sparkles className="h-4 w-4" />
-          AI Resolution Suggestions
+          {getButtonText()}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>AI Resolution Suggestions</DialogTitle>
+          <DialogTitle>{getAnalysisTitle()}</DialogTitle>
           <DialogDescription>
-            AI-powered analysis and recommendations for this {ticket.type}.
+            {getAnalysisDescription()}
           </DialogDescription>
         </DialogHeader>
 

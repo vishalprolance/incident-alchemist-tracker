@@ -12,7 +12,72 @@ const model = genAI.getGenerativeModel({
 
 export async function analyzeTicket(ticket: Ticket | Partial<Ticket>): Promise<string> {
   try {
-    const prompt = `
+    let prompt = "";
+    
+    switch (ticket.type) {
+      case "incident":
+        prompt = `
+You are an experienced IT incident analyst. Please provide a comprehensive root cause analysis for the following incident:
+
+Title: ${ticket.title}
+Description: ${ticket.description}
+Priority: ${ticket.priority}
+Status: ${ticket.status}
+
+Your analysis should include:
+1. Potential root causes (list 3-4 possibilities in order of likelihood)
+2. Diagnostic steps to confirm each potential cause
+3. Recommended immediate actions to restore service
+4. Long-term preventive measures
+5. Key metrics to monitor to prevent similar incidents
+
+Provide a clear, actionable report that would help an IT team quickly resolve this issue and prevent recurrence.
+`;
+        break;
+        
+      case "problem":
+        prompt = `
+You are an IT problem management specialist. Please analyze this problem ticket and suggest solutions:
+
+Title: ${ticket.title}
+Description: ${ticket.description}
+Priority: ${ticket.priority}
+Status: ${ticket.status}
+
+Provide a thorough analysis with:
+1. Most likely underlying causes of this recurring issue
+2. Detailed solution recommendations (with specific steps)
+3. Implementation approach (including testing methodology)
+4. Success criteria for verifying the problem is fixed
+5. Risk assessment of each suggested solution
+
+Format your response as a professional problem resolution plan that could be immediately implemented.
+`;
+        break;
+        
+      case "change":
+        prompt = `
+You are a change management expert. Please provide a standard operating procedure for implementing this change:
+
+Title: ${ticket.title}
+Description: ${ticket.description}
+Priority: ${ticket.priority}
+Status: ${ticket.status}
+
+Your SOP should include:
+1. Detailed pre-implementation checklist
+2. Step-by-step implementation procedure (with commands if applicable)
+3. Verification and testing steps
+4. Rollback procedure in case of failure
+5. Post-implementation verification steps
+6. List of potential systems impacted by this change
+
+Present this as a formal change implementation plan that follows ITIL best practices.
+`;
+        break;
+        
+      default:
+        prompt = `
 You are an IT service management AI assistant. Please analyze the following ${ticket.type} and provide actionable recommendations:
 
 Title: ${ticket.title}
@@ -26,6 +91,7 @@ Provide a concise analysis with:
 3. Next steps for resolution
 4. Prevention measures for similar issues
 `;
+    }
 
     const result = await model.generateContent(prompt);
     const response = result.response;
