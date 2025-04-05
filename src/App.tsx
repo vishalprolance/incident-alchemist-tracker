@@ -11,6 +11,7 @@ import Dashboard from "@/pages/Dashboard";
 import Incidents from "@/pages/Incidents";
 import Problems from "@/pages/Problems";
 import Changes from "@/pages/Changes";
+import History from "@/pages/History";
 import NewTicket from "@/pages/NewTicket";
 import TicketView from "@/pages/TicketView";
 import Settings from "@/pages/Settings";
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="incidents" element={<Incidents />} />
                 <Route path="problems" element={<Problems />} />
                 <Route path="changes" element={<Changes />} />
+                <Route path="history" element={<History />} />
                 <Route path="new-ticket" element={<NewTicket />} />
                 <Route path="ticket/:id" element={<TicketView />} />
                 <Route path="settings" element={<Settings />} />

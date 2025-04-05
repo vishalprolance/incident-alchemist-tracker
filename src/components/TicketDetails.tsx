@@ -38,6 +38,7 @@ import { useTickets, TicketStatus } from "@/contexts/TicketContext";
 import { toast } from "sonner";
 import { GenAIResolutionSuggester } from "./GenAIResolutionSuggester";
 import { TicketComments } from "./TicketComments";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function TicketDetails() {
   const { id } = useParams<{ id: string }>();
@@ -143,7 +144,7 @@ export function TicketDetails() {
                 <p className="mt-1">{ticket.description}</p>
               </div>
               
-              {ticket.type === "change" && (
+              {(ticket.type === "change" || ticket.impactedSystems) && (
                 <div>
                   <Label className="text-muted-foreground text-sm">Impacted Systems</Label>
                   <p className="mt-1 p-2 bg-muted rounded-md">
@@ -234,9 +235,50 @@ function ResolutionDialog({ ticket }: ResolutionDialogProps) {
   const [resolution, setResolution] = useState(ticket.resolution || "");
   const [rootCause, setRootCause] = useState(ticket.rootCause || "");
   const [impactedSystems, setImpactedSystems] = useState(ticket.impactedSystems || "");
+  const [tvtApproval, setTvtApproval] = useState(ticket.tvtApproval || false);
+  const [bvtApproval, setBvtApproval] = useState(ticket.bvtApproval || false);
+  const [implementationTime, setImplementationTime] = useState<string>(ticket.implementationTime || "");
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
   const { updateTicket } = useTickets();
   
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+    
+    if (!resolution.trim()) {
+      newErrors.resolution = "Resolution details are required";
+    }
+    
+    if (ticket.type === "incident" && !rootCause.trim()) {
+      newErrors.rootCause = "Root cause analysis is required";
+    }
+    
+    if (ticket.type === "change") {
+      if (!impactedSystems.trim()) {
+        newErrors.impactedSystems = "Impacted systems are required";
+      }
+      
+      if (!tvtApproval) {
+        newErrors.tvtApproval = "TVT approval is required";
+      }
+      
+      if (!bvtApproval) {
+        newErrors.bvtApproval = "BVT approval is required";
+      }
+      
+      if (!implementationTime) {
+        newErrors.implementationTime = "Implementation time is required";
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
   const handleSubmit = () => {
+    if (!validateForm()) {
+      return;
+    }
+    
     const updates: any = { 
       status: "resolved", 
       resolution 
@@ -248,6 +290,9 @@ function ResolutionDialog({ ticket }: ResolutionDialogProps) {
     
     if (ticket.type === "change") {
       updates.impactedSystems = impactedSystems;
+      updates.tvtApproval = tvtApproval;
+      updates.bvtApproval = bvtApproval;
+      updates.implementationTime = implementationTime;
     }
     
     updateTicket(ticket.id, updates);
@@ -265,52 +310,111 @@ function ResolutionDialog({ ticket }: ResolutionDialogProps) {
           Add resolution details
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="sm:max-w-[500px]">
-        <AlertDialogHeader>
-          <AlertDialogTitle>Add Resolution Details</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will update the status to resolved and add your resolution details.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        
-        <div className="space-y-4 py-2">
-          {(ticket.type === "incident" || ticket.type === "problem") && (
-            <div className="space-y-2">
-              <Label htmlFor="rootCause">Root Cause</Label>
-              <Textarea
-                id="rootCause"
-                placeholder="What was the root cause of this issue?"
-                value={rootCause}
-                onChange={(e) => setRootCause(e.target.value)}
-                className="min-h-[80px]"
-              />
-            </div>
-          )}
+      <AlertDialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-hidden">
+        <ScrollArea className="max-h-[calc(90vh-12rem)]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Add Resolution Details</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will update the status to resolved and add your resolution details.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           
-          {ticket.type === "change" && (
+          <div className="space-y-4 py-2">
+            {(ticket.type === "incident" || ticket.type === "problem") && (
+              <div className="space-y-2">
+                <Label htmlFor="rootCause">Root Cause</Label>
+                <Textarea
+                  id="rootCause"
+                  placeholder="What was the root cause of this issue?"
+                  value={rootCause}
+                  onChange={(e) => setRootCause(e.target.value)}
+                  className={`min-h-[80px] ${errors.rootCause ? 'border-red-500' : ''}`}
+                />
+                {errors.rootCause && (
+                  <p className="text-sm text-red-500">{errors.rootCause}</p>
+                )}
+              </div>
+            )}
+            
+            {ticket.type === "change" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="impactedSystems">Impacted Systems</Label>
+                  <Textarea
+                    id="impactedSystems"
+                    placeholder="List all systems impacted by this change"
+                    value={impactedSystems}
+                    onChange={(e) => setImpactedSystems(e.target.value)}
+                    className={`min-h-[80px] ${errors.impactedSystems ? 'border-red-500' : ''}`}
+                  />
+                  {errors.impactedSystems && (
+                    <p className="text-sm text-red-500">{errors.impactedSystems}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="implementationTime">Implementation Time</Label>
+                  <input
+                    type="datetime-local"
+                    id="implementationTime"
+                    value={implementationTime}
+                    onChange={(e) => setImplementationTime(e.target.value)}
+                    className={`w-full rounded-md border p-2 ${errors.implementationTime ? 'border-red-500' : 'border-input'}`}
+                  />
+                  {errors.implementationTime && (
+                    <p className="text-sm text-red-500">{errors.implementationTime}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="tvtApproval"
+                      checked={tvtApproval}
+                      onChange={(e) => setTvtApproval(e.target.checked)}
+                      className={`h-4 w-4 ${errors.tvtApproval ? 'border-red-500' : ''}`}
+                    />
+                    <Label htmlFor="tvtApproval">TVT Approval Received</Label>
+                  </div>
+                  {errors.tvtApproval && (
+                    <p className="text-sm text-red-500">{errors.tvtApproval}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="bvtApproval"
+                      checked={bvtApproval}
+                      onChange={(e) => setBvtApproval(e.target.checked)}
+                      className={`h-4 w-4 ${errors.bvtApproval ? 'border-red-500' : ''}`}
+                    />
+                    <Label htmlFor="bvtApproval">BVT Approval Received</Label>
+                  </div>
+                  {errors.bvtApproval && (
+                    <p className="text-sm text-red-500">{errors.bvtApproval}</p>
+                  )}
+                </div>
+              </>
+            )}
+            
             <div className="space-y-2">
-              <Label htmlFor="impactedSystems">Impacted Systems</Label>
+              <Label htmlFor="resolution">Resolution Details</Label>
               <Textarea
-                id="impactedSystems"
-                placeholder="List all systems impacted by this change"
-                value={impactedSystems}
-                onChange={(e) => setImpactedSystems(e.target.value)}
-                className="min-h-[80px]"
+                id="resolution"
+                placeholder="Describe how this issue was resolved"
+                value={resolution}
+                onChange={(e) => setResolution(e.target.value)}
+                className={`min-h-[120px] ${errors.resolution ? 'border-red-500' : ''}`}
               />
+              {errors.resolution && (
+                <p className="text-sm text-red-500">{errors.resolution}</p>
+              )}
             </div>
-          )}
-          
-          <div className="space-y-2">
-            <Label htmlFor="resolution">Resolution Details</Label>
-            <Textarea
-              id="resolution"
-              placeholder="Describe how this issue was resolved"
-              value={resolution}
-              onChange={(e) => setResolution(e.target.value)}
-              className="min-h-[120px]"
-            />
           </div>
-        </div>
+        </ScrollArea>
         
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>

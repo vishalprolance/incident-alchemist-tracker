@@ -34,7 +34,12 @@ export default function TicketList({ type }: TicketListProps) {
   
   // Apply filters
   useEffect(() => {
-    let filtered = tickets.filter(ticket => ticket.type === type);
+    // Only show active tickets (not closed/resolved)
+    let filtered = tickets.filter(ticket => 
+      ticket.type === type && 
+      ticket.status !== "closed" && 
+      ticket.status !== "resolved"
+    );
     
     // Apply search filter
     if (searchTerm) {
@@ -69,7 +74,7 @@ export default function TicketList({ type }: TicketListProps) {
       <div>
         <h2 className="text-3xl font-bold tracking-tight">{formatTypeTitle(type)}</h2>
         <p className="text-muted-foreground">
-          Manage and track all {type} tickets
+          Manage and track all active {type} tickets
         </p>
       </div>
       
@@ -96,8 +101,6 @@ export default function TicketList({ type }: TicketListProps) {
               <SelectItem value="new">New</SelectItem>
               <SelectItem value="inProgress">In Progress</SelectItem>
               <SelectItem value="onHold">On Hold</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
             </SelectContent>
           </Select>
           <Select
@@ -116,10 +119,15 @@ export default function TicketList({ type }: TicketListProps) {
           </Select>
         </div>
         
-        <Button onClick={() => navigate(`/new-ticket?type=${type}`)}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          New {type.charAt(0).toUpperCase() + type.slice(1)}
-        </Button>
+        <div className="flex gap-4">
+          <Button variant="outline" onClick={() => navigate("/history")}>
+            View History
+          </Button>
+          <Button onClick={() => navigate(`/new-ticket?type=${type}`)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            New {type.charAt(0).toUpperCase() + type.slice(1)}
+          </Button>
+        </div>
       </div>
       
       <Separator />
@@ -131,15 +139,20 @@ export default function TicketList({ type }: TicketListProps) {
           ))
         ) : (
           <div className="text-center py-12">
-            <h3 className="text-lg font-semibold">No {formatTypeTitle(type).toLowerCase()} found</h3>
+            <h3 className="text-lg font-semibold">No active {formatTypeTitle(type).toLowerCase()} found</h3>
             <p className="text-muted-foreground mb-6">
               {searchTerm || statusFilter !== "all" || priorityFilter !== "all" 
                 ? "Try adjusting your filters"
-                : `There are currently no ${type} tickets in the system`}
+                : `There are currently no active ${type} tickets in the system`}
             </p>
-            <Button onClick={() => navigate(`/new-ticket?type=${type}`)}>
-              Create New {type.charAt(0).toUpperCase() + type.slice(1)}
-            </Button>
+            <div className="flex justify-center gap-4">
+              <Button variant="outline" onClick={() => navigate("/history")}>
+                View Closed Tickets
+              </Button>
+              <Button onClick={() => navigate(`/new-ticket?type=${type}`)}>
+                Create New {type.charAt(0).toUpperCase() + type.slice(1)}
+              </Button>
+            </div>
           </div>
         )}
       </div>
