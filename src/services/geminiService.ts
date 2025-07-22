@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Ticket, TicketType } from "@/contexts/TicketContext";
 
 // Using the provided API key directly since it's a public API key for this demo
-const API_KEY = "AIzaSyCCy-dgtUA8ng8cLHQ9ZFs_-BURfDFT-kk";
+const API_KEY = "AIzaSyDzdRxEYKrbBzVzHpScWC4lVkuo89r8gsE";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const model = genAI.getGenerativeModel({
